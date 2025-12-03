@@ -1,0 +1,8 @@
+make: Entering directory '/home/chipyard/chipyard/sims/verilator'
+Running with RISCV=/home/chipyard/chipyard/.conda-env/riscv-tools
+mkdir -p /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig
+(set -o pipefail && 	cd /home/chipyard/chipyard && java -cp /home/chipyard/chipyard/.classpath_cache/chipyard.jar chipyard.Generator  --target-dir /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig --name chipyard.harness.TestHarness.GemminiRocketConfig --top-module chipyard.harness.TestHarness --legacy-configs chipyard:GemminiRocketConfig   | tee /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig/chipyard.harness.TestHarness.GemminiRocketConfig.chisel.log)
+Picked up JAVA_TOOL_OPTIONS: -Xmx8G -Xss8M -Djava.io.tmpdir=/home/chipyard/chipyard/.java_tmp
+(3,List(UInt<7>(123)))
+make: *** [/home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig/chipyard.harness.TestHarness.GemminiRocketConfig.fir] Deleting file '/home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig/chipyard.harness.TestHarness.GemminiRocketConfig.chisel.log'
+make: *** [/home/chipyard/chipyard/common.mk:131: /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig/chipyard.harness.TestHarness.GemminiRocketConfig.fir] Error 130

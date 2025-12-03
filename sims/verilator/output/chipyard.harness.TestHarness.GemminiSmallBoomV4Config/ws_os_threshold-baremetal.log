@@ -1,0 +1,11 @@
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 15326' or larger
+[UART] UART0 is here (stdin/stdout).
+Gemmini offloading threshold finder (M=N=8, K in {1,2,3,4,8})
+== Offloading threshold sweep (M=16, N=16, row-major, blocked-CPU) ==
+[K= 1] CPU:      7265 cyc | ACC(OS):      2324 cyc | speedup=  3.12x <- OFFLOAD
+[K= 2] CPU:      9577 cyc | ACC(OS):      1194 cyc | speedup=  8.02x <- OFFLOAD
+[K= 3] CPU:     11811 cyc | ACC(OS):      1022 cyc | speedup= 11.55x <- OFFLOAD
+[K= 4] CPU:     14609 cyc | ACC(OS):       998 cyc | speedup= 14.63x <- OFFLOAD
+== Threshold K* = 1 ==
+Done.
+- /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiSmallBoomV4Config/gen-collateral/TestDriver.v:158: Verilog $finish

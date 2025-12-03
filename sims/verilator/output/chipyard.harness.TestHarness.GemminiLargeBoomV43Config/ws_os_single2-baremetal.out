@@ -1,0 +1,31 @@
+testing $random e23cbb39
+== Loading device model file '/home/chipyard/chipyard/generators/testchipip/src/main/resources/dramsim2_ini/DDR3_micron_64M_8B_x4_sg15.ini' == 
+== Loading system model file '/home/chipyard/chipyard/generators/testchipip/src/main/resources/dramsim2_ini/system.ini' == 
+===== MemorySystem 0 =====
+CH. 0 TOTAL_STORAGE : 4096MB | 1 Ranks | 16 Devices per rank
+DRAMSim2 Clock Frequency =666666666Hz, CPU Clock Frequency=500000000Hz
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(187352470, 145453632,   1050754, 218876740, 267470533, 268244191,  20638215, 253007347,  78971635, 223249858, 170397626, 169547429,  55561071, 147857682, 158155397,  19153820, 100933936,  70381698, 254048043, 205359567, 188281737, 153776786,  24838680, 140286262, 259660793,  83720649, 189665867, 150498089)
+Utilization:  8
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  8
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,    951746,    528298,    726692,   1035118,      8450,    868996,    279436,    270624,    127106,    292650,    887246,    586632,    684674,    721416,    825638,         0,    883144,    922186,    551720)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0)
+*** PASSED *** Completed after             12575286 simulation cycles

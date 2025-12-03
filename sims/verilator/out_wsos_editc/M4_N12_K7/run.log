@@ -1,0 +1,18 @@
+Running with RISCV=/home/chipyard/chipyard/.conda-env/riscv-tools
+if [ "/home/chipyard/chipyard/generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_threshold-baremetal" != "none" ] && [ ! -f "/home/chipyard/chipyard/generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_threshold-baremetal" ]; then printf "\n\nBinary /home/chipyard/chipyard/generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_threshold-baremetal not found\n\n"; exit 1; fi
+(set -o pipefail &&  /home/chipyard/chipyard/sims/verilator/simulator-chipyard.harness-GemminiLargeBoomV4Config \
+	+permissive \
+	+dramsim +dramsim_ini_dir=/home/chipyard/chipyard/generators/testchipip/src/main/resources/dramsim2_ini +max-cycles=100000000000000000 +loadmem=/home/chipyard/chipyard/generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_threshold-baremetal     \
+	+verbose \
+	+permissive-off \
+	/home/chipyard/chipyard/generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_threshold-baremetal \
+	 \
+	</dev/null 2> >(spike-dasm > /home/chipyard/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Config/ws_os_threshold-baremetal.out) | tee /home/chipyard/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Config/ws_os_threshold-baremetal.log)
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 15389' or larger
+[UART] UART0 is here (stdin/stdout).
+Gemmini offloading threshold finder (M=N=8, K in {1,2,3,4,8})
+== Offloading threshold sweep (M=4, N=12, row-major, blocked-CPU) ==
+[K= 7] CPU:      3107 cyc | ACC(OS):      1910 cyc | speedup=  1.62x <- OFFLOAD
+== Threshold K* = 7 ==
+Done.
+- /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiLargeBoomV4Config/gen-collateral/TestDriver.v:158: Verilog $finish

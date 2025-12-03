@@ -1,0 +1,5 @@
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 15494' or larger
+[UART] UART0 is here (stdin/stdout).
+Gemmini One-shot MM | DF=OS  M=1024 N=1024 K=1024
+warmups=1 | cycles=6314617 | MAC/100cyc=17004 | sum(C)=-465366
+- /home/chipyard/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiLargeBoomV43Config/gen-collateral/TestDriver.v:158: Verilog $finish

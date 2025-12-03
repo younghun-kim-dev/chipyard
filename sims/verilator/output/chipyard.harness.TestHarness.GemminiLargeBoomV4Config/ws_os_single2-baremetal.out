@@ -1,0 +1,135 @@
+testing $random e23cbb39
+== Loading device model file '/home/chipyard/chipyard/generators/testchipip/src/main/resources/dramsim2_ini/DDR3_micron_64M_8B_x4_sg15.ini' == 
+== Loading system model file '/home/chipyard/chipyard/generators/testchipip/src/main/resources/dramsim2_ini/system.ini' == 
+===== MemorySystem 0 =====
+CH. 0 TOTAL_STORAGE : 4096MB | 1 Ranks | 16 Devices per rank
+DRAMSim2 Clock Frequency =666666666Hz, CPU Clock Frequency=500000000Hz
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(       32,  71888115, 135499257,  14503052,  48425266, 139267409, 221245262,  59842987, 167331540, 185437492,  34090480, 123814257,  44411187, 137275716,  25471236,  30123439, 117254552, 168667977, 191572811,  96208126,  99533771,  55337549,  71671877, 136710067,  20744211, 132998598,  92710469,  65326870)
+Utilization:  8
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  8
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0)
+Utilization: 16
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  6
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q: 16
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,     98304,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,     32768,     98320,    229392,    491536,         0,         0,         0,         0)
+Utilization:  4
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  2
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 4
+Utilization ex q:  0
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         2,         0)
+Utilization: 16
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  6
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q: 16
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,    917504,    917536,    917600,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,    131072,    393216,         0,         0,         0,         0)
+Utilization:  9
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  2
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 4
+Utilization ex q:  5
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         8,         0,         0,         0)
+Utilization: 16
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  6
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q: 16
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,       128,       384,       896,         0,         0,         0,         0,         0,         0,      1920,    132992,         0,         0,         0,         0,         0)
+Utilization: 15
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  6
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q: 15
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,       128,         0,         0,       384,      2432,      6528,     14720,         0,         0,         0,         0,         0,         0,         0,         0,         0)
+Utilization:  0
+Utilization ld q (incomplete):  0
+Utilization st q (incomplete):  0
+Utilization ex q (incomplete):  0
+Utilization ld q:  0
+Utilization st q: 0
+Utilization ex q:  0
+Packed deps: Vec(        0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0,         0)
+*** PASSED *** Completed after             67860496 simulation cycles

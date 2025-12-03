@@ -1,0 +1,1 @@
+[M=8 N=8 K=1] CPU:      1023 cyc | ACC(WS):       703 cyc | speedup=  1.45x <- OFFLOAD
