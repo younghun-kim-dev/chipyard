@@ -1,0 +1,17 @@
+make: Entering directory '/home/chipyard_1/chipyard/sims/verilator'
+Running with RISCV=/home/chipyard_1/chipyard/.conda-env/riscv-tools
+if [ "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_single-baremetal" != "none" ] && [ ! -f "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_single-baremetal" ]; then printf "\n\nBinary ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_single-baremetal not found\n\n"; exit 1; fi
+(set -o pipefail &&  /home/chipyard_1/chipyard/sims/verilator/simulator-chipyard.harness-GemminiRocketConfig \
+	+permissive \
+	+dramsim +dramsim_ini_dir=/home/chipyard_1/chipyard/generators/testchipip/src/main/resources/dramsim2_ini +max-cycles=100000000000000000000000 +loadmem=../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_single-baremetal     \
+	+verbose \
+	+permissive-off \
+	../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/ws_os_single-baremetal \
+	 \
+	</dev/null 2> >(spike-dasm > /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiRocketConfig/ws_os_single-baremetal.out) | tee /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiRocketConfig/ws_os_single-baremetal.log)
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 15363' or larger
+[UART] UART0 is here (stdin/stdout).
+Gemmini One-shot MM  | DF=WS  M=64 N=32 K=16
+warmups=1 | cycles=1168 | MAC/100cyc=2805 | sum(C)=713
+- /home/chipyard_1/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiRocketConfig/gen-collateral/TestDriver.v:158: Verilog $finish
+make: Leaving directory '/home/chipyard_1/chipyard/sims/verilator'

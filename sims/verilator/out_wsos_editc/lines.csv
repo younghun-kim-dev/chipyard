@@ -1,0 +1,3 @@
+HeaderLine,ResultLine
+"== Offloading threshold sweep (M=8, N=8, row-major, blocked-CPU) ==","[K= 2] CPU:      1099 cyc | ACC(OS):      1957 cyc | speedup=  0.56x "
+"== Offloading threshold sweep (M=8, N=8, row-major, blocked-CPU) ==","[K= 4] CPU:      1471 cyc | ACC(OS):      1960 cyc | speedup=  0.75x "

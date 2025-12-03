@@ -1,0 +1,11 @@
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 29252' or larger
+[UART] UART0 is here (stdin/stdout).
+--- Hetero GEMM + MemBW test 시작 (총 3 코어) ---
+>> Hart 0 finished at cycle 9519
+>> Hart 1 finished at cycle 16052
+[Hart 2 - BOOM] Gemmini GEMM 시작
+[BOOM GEMM] GEMM 256x256 * 256x256 -> cycles=180096
+[Hart 2 - BOOM] 완료
+>> Hart 2 finished at cycle 2767618
+--- 모든 코어 임무 완료, 테스트 종료 ---
+- /home/chipyard_1/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket2Config/gen-collateral/TestDriver.v:158: Verilog $finish

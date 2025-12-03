@@ -1,0 +1,34 @@
+Running with RISCV=/home/chipyard_1/chipyard/.conda-env/riscv-tools
+if [ "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal" != "none" ] && [ ! -f "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal" ]; then printf "\n\nBinary ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal not found\n\n"; exit 1; fi
+(set -o pipefail &&  /home/chipyard_1/chipyard/sims/verilator/simulator-chipyard.harness-GemminiLargeBoomV4Rocket22CHL24BanksConfig \
+        +permissive \
+        +dramsim +dramsim_ini_dir=/home/chipyard_1/chipyard/generators/testchipip/src/main/resources/dramsim2_ini +max-cycles=100000000000000000000000 +loadmem=../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal     \
+        +verbose \
+        +permissive-off \
+        ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal \
+         \
+        </dev/null 2> >(spike-dasm > /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket22CHL24BanksConfig/hetero_gemm_bwtest2-baremetal.out) | tee /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket22CHL24BanksConfig/hetero_gemm_bwtest2-baremetal.log)
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 29544' or larger
+[UART] UART0 is here (stdin/stdout).
+--- Hetero GEMM + MemBW test 시작 (총 3 코어) ---
+[Hart 0 - Rocket#1] mem-stress 시작
+[Hart 2 - BOOM] Gemmini GEMM 시작
+[Hart 1 - Rocket#2] mem-stress 시작
+[tile i=0 j=0] im=64 jn=64 -> cycles=16716
+[tile i=0 j=64] im=64 jn=64 -> cycles=14675
+[tile i=0 j=128] im=64 jn=64 -> cycles=14836
+[tile i=0 j=192] im=64 jn=64 -> cycles=13280
+[tile i=64 j=0] im=64 jn=64 -> cycles=13978
+[tile i=64 j=64] im=64 jn=64 -> cycles=13168
+[tile i=64 j=128] im=64 jn=64 -> cycles=13095
+[tile i=64 j=192] im=64 jn=64 -> cycles=13154
+[tile i=128 j=0] im=64 jn=64 -> cycles=14101
+[tile i=128 j=64] im=64 jn=64 -> cycles=13123
+[tile i=128 j=128] im=64 jn=64 -> cycles=13119
+[tile i=128 j=192] im=64 jn=64 -> cycles=13133
+[tile i=192 j=0] im=64 jn=64 -> cycles=13857
+[tile i=192 j=64] im=64 jn=64 -> cycles=13152
+[tile i=192 j=128] im=64 jn=64 -> cycles=13211
+[tile i=192 j=192] im=64 jn=64 -> cycles=13318
+[Hart 2 - BOOM] 완료
+>> Hart 2 finished at cycle 2950616

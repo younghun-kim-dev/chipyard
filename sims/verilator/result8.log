@@ -1,0 +1,42 @@
+Running with RISCV=/home/chipyard_1/chipyard/.conda-env/riscv-tools
+if [ "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal" != "none" ] && [ ! -f "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal" ]; then printf "\n\nBinary ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal not found\n\n"; exit 1; fi
+(set -o pipefail &&  /home/chipyard_1/chipyard/sims/verilator/simulator-chipyard.harness-GemminiLargeBoomV4Rocket2Config \
+	+permissive \
+	+dramsim +dramsim_ini_dir=/home/chipyard_1/chipyard/generators/testchipip/src/main/resources/dramsim2_ini +max-cycles=100000000000000000000000 +loadmem=../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal     \
+	+verbose \
+	+permissive-off \
+	../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest2-baremetal \
+	 \
+	</dev/null 2> >(spike-dasm > /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket2Config/hetero_gemm_bwtest2-baremetal.out) | tee /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket2Config/hetero_gemm_bwtest2-baremetal.log)
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 29252' or larger
+[UART] UART0 is here (stdin/stdout).
+--- Hetero GEMM + MemBW test 시작 (총 3 코어) ---
+[Hart 0 - Rocket#1] mem-stress 시작
+[Hart 2 - BOOM] Gemmini GEMM 시작
+[Hart 1 - Rocket#2] mem-stress 시작
+[tile i=0 j=0] im=64 jn=64 -> cycles=52327
+[tile i=0 j=64] im=64 jn=64 -> cycles=42007
+[tile i=0 j=128] im=64 jn=64 -> cycles=42446
+[tile i=0 j=192] im=64 jn=64 -> cycles=40489
+[tile i=64 j=0] im=64 jn=64 -> cycles=44006
+[tile i=64 j=64] im=64 jn=64 -> cycles=37848
+[tile i=64 j=128] im=64 jn=64 -> cycles=37765
+[tile i=64 j=192] im=64 jn=64 -> cycles=38554
+[tile i=128 j=0] im=64 jn=64 -> cycles=42781
+[tile i=128 j=64] im=64 jn=64 -> cycles=38233
+[tile i=128 j=128] im=64 jn=64 -> cycles=37758
+[tile i=128 j=192] im=64 jn=64 -> cycles=37795
+[tile i=192 j=0] im=64 jn=64 -> cycles=43221
+[tile i=192 j=64] im=64 jn=64 -> cycles=37372
+[tile i=192 j=128] im=64 jn=64 -> cycles=37520
+[tile i=192 j=192] im=64 jn=64 -> cycles=38180
+[Hart 2 - BOOM] 완료
+>> Hart 2 finished at cycle 3456955
+[Rocket R0 linear] stress=8 MiB, stride=64, passes=1 -> cycles=2618928, sink=12582912
+[Hart 0 - Rocket#1] 완료
+>> Hart 0 finished at cycle 6525441
+[Rocket R1 linear] stress=8 MiB, stride=64, passes=1 -> cycles=6903671, sink=12582912
+[Hart 1 - Rocket#2] 완료
+>> Hart 1 finished at cycle 17027372
+--- 모든 코어 임무 완료, 테스트 종료 ---
+- /home/chipyard_1/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket2Config/gen-collateral/TestDriver.v:158: Verilog $finish

@@ -1,0 +1,19 @@
+Running with RISCV=/home/chipyard_1/chipyard/.conda-env/riscv-tools
+if [ "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest-baremetal" != "none" ] && [ ! -f "../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest-baremetal" ]; then printf "\n\nBinary ../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest-baremetal not found\n\n"; exit 1; fi
+(set -o pipefail &&  /home/chipyard_1/chipyard/sims/verilator/simulator-chipyard.harness-GemminiLargeBoomV4Rocket22CHConfig \
+	+permissive \
+	+dramsim +dramsim_ini_dir=/home/chipyard_1/chipyard/generators/testchipip/src/main/resources/dramsim2_ini +max-cycles=100000000000000000000000 +loadmem=../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest-baremetal     \
+	+verbose \
+	+permissive-off \
+	../../generators/gemmini/software/gemmini-rocc-tests/build/bareMetalC/hetero_gemm_bwtest-baremetal \
+	 \
+	</dev/null 2> >(spike-dasm > /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket22CHConfig/hetero_gemm_bwtest-baremetal.out) | tee /home/chipyard_1/chipyard/sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket22CHConfig/hetero_gemm_bwtest-baremetal.log)
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 29255' or larger
+[UART] UART0 is here (stdin/stdout).
+--- Hetero GEMM + MemBW test 시작 (총 3 코어) ---
+[Hart 0 - Rocket#1] mem-stress 시작
+[Hart 2 - BOOM] Gemmini GEMM 시작
+[Hart 1 - Rocket#2] mem-stress 시작
+[BOOM GEMM] GEMM 256x256 * 256x256 -> cycles=521146
+[Hart 2 - BOOM] 완료
+>> Hart 2 finished at cycle 3174714
