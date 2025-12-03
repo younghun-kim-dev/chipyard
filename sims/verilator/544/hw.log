@@ -1,0 +1,8 @@
+Running with RISCV=/home/chipyard_repro/chipyard/.conda-env/riscv-tools
+if [ "/home/chipyard_repro/chipyard/generators/sha3/software/tests/bare/sha3-rocc.riscv" != "none" ] && [ ! -f "/home/chipyard_repro/chipyard/generators/sha3/software/tests/bare/sha3-rocc.riscv" ]; then printf "\n\nBinary /home/chipyard_repro/chipyard/generators/sha3/software/tests/bare/sha3-rocc.riscv not found\n\n"; exit 1; fi
+(set -o pipefail &&  /home/chipyard_repro/chipyard/sims/verilator/simulator-chipyard.harness-Sha3RocketConfig +permissive +dramsim +dramsim_ini_dir=/home/chipyard_repro/chipyard/generators/testchipip/src/main/resources/dramsim2_ini +max-cycles=1000000000000000000     +verbose +permissive-off /home/chipyard_repro/chipyard/generators/sha3/software/tests/bare/sha3-rocc.riscv </dev/null 2> >(spike-dasm > /home/chipyard_repro/chipyard/sims/verilator/output/chipyard.harness.TestHarness.Sha3RocketConfig/sha3-rocc.out) | tee /home/chipyard_repro/chipyard/sims/verilator/output/chipyard.harness.TestHarness.Sha3RocketConfig/sha3-rocc.log)
+[UART] UART0 is here (stdin/stdout).
+Start basic test 1.
+Success!
+SHA execution took 474 cycles
+- /home/chipyard_repro/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.Sha3RocketConfig/gen-collateral/TestDriver.v:158: Verilog $finish

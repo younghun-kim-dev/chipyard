@@ -12,7 +12,7 @@
 	url = https://github.com/ucb-bar/riscv-torture.git
 [submodule "generators/boom"]
 	path = generators/boom
-	url = https://github.com/riscv-boom/riscv-boom.git
+	url = https://github.com/younghun-kim-dev/riscv-boom.git
 [submodule "generators/hwacha"]
 	path = generators/hwacha
 	url = https://github.com/ucb-bar/hwacha.git
@@ -27,7 +27,7 @@
 	url = https://github.com/ucb-bar/dsptools.git
 [submodule "generators/sha3"]
 	path = generators/sha3
-	url = https://github.com/ucb-bar/sha3.git
+	url = https://github.com/younghun-kim-dev/sha3.git
 [submodule "vlsi/hammer-mentor-plugins"]
 	path = vlsi/hammer-mentor-plugins
 	url = https://github.com/ucb-bar/hammer-mentor-plugins.git
@@ -42,7 +42,7 @@
 	url = https://github.com/ucb-bar/coremark-workload.git
 [submodule "generators/gemmini"]
 	path = generators/gemmini
-	url = https://github.com/ucb-bar/gemmini
+	url = https://github.com/younghun-kim-dev/gemmini
 [submodule "software/firemarshal"]
 	path = software/firemarshal
 	url = https://github.com/firesim/FireMarshal.git
