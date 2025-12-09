@@ -250,8 +250,4 @@ Pointers from the high-level story above to concrete code in this fork:
 
 ---
 
-This layout lets a reader (or admissions committee) quickly map the CV/SOP lines:
-
-> “Integrated a SHA-3 RoCC with Rocket, profiled speedups from 136 B to 544 KB, found speedup collapsing from 206× to 120× due to single-bank inclusive L2 contention, and redesigned L2 as multi-bank to recover ≈34% throughput at large inputs and stabilize efficiency across scales.”
-
-to **specific configs, scripts, CSVs, and figures** in this repository.
+Each result reported above can be reproduced from the configs, benchmarks, and measurement scripts documented in this repository.
