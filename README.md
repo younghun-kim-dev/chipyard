@@ -127,7 +127,7 @@ Speedups are shown as **slowdown vs baseline** (higher = worse). Baseline is `Ge
 #### Figure – GEMM latency vs topology and stress
 
 <p align="center">
-  <img src="figs/fig1_gemm_latency.png" width="520"/>
+  <img src="figs/fig1_gemm_latency.png" width="700"/>
 </p>
 
 * x-axis: `(Config / stress)` pairs.
@@ -181,7 +181,7 @@ So, under identical 8 MiB stress:
 #### Figure – tile latency distributions (1CH vs 2CH+4L2)
 
 <p align="center">
-  <img src="figs/fig2_tile_latency.png" width="520"/>
+  <img src="figs/fig2_tile_latency.png" width="700"/>
 </p>
 
 * x-axis:
