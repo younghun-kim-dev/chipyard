@@ -11,7 +11,7 @@
 # Project Summary
 
 <p align="center">
-  <img src="figs/fig1_gemm_latency.png" width="520"/>
+  <img src="figs/fig1_gemm_latency.png" width="650"/>
 </p>
 
 | Aspect          | Summary                                                                                                                                                                                                                                                                                                                                                                                           |
