@@ -49,7 +49,6 @@ This README uses compact figures and tables; full UART logs and cycle dumps rema
   * `GemminiLargeBoomV4Rocket2Config` – 1 DRAM channel, default L2.
   * `GemminiLargeBoomV4Rocket22CHConfig` – **2 DRAM channels**, default L2.
   * `GemminiLargeBoomV4Rocket22CHL24BanksConfig` – **2 DRAM channels + 4-bank L2**, tuned memory controller.
-  * (Exact filenames may differ slightly by commit; look for `GemminiLargeBoomV4Rocket2*` configs under `generators/chipyard/src/main/scala/config/`.)
 
 * **Cores / harts**
 
@@ -127,8 +126,6 @@ Speedups are shown as **slowdown vs baseline** (higher = worse). Baseline is `Ge
 
 #### Figure – GEMM latency vs topology and stress
 
-(Place this PNG under `figs/`.)
-
 <p align="center">
   <img src="figs/fig1_gemm_latency.png" width="520"/>
 </p>
@@ -183,8 +180,6 @@ So, under identical 8 MiB stress:
 
 #### Figure – tile latency distributions (1CH vs 2CH+4L2)
 
-(Place this PNG under `figs/`.)
-
 <p align="center">
   <img src="figs/fig2_tile_latency.png" width="520"/>
 </p>
@@ -220,17 +215,12 @@ Pointers from this high-level story to concrete code and logs in the `chipyard_h
 
   * `generators/chipyard/src/main/scala/config/`
 
-    * Look for configs named like:
+    * Configs such as:
 
       * `GemminiLargeBoomV4Rocket2Config`
       * `GemminiLargeBoomV4Rocket22CHConfig`
       * `GemminiLargeBoomV4Rocket22CHL24BanksConfig`
     * These set the **BOOM+Rocket+Gemmini topology**, DRAM channel count, and L2 banking.
-  * Additional mixins (names may vary slightly by commit) define:
-
-    * DRAM channel count (1CH vs 2CH).
-    * L2 bank count (1 vs 4).
-    * Memory-controller parameters used in the tuned config.
 
 * **Co-run benchmarks (Gemmini ROCC tests)**
 
@@ -271,8 +261,6 @@ Pointers from this high-level story to concrete code and logs in the `chipyard_h
   * `figs/fig2_tile_latency.png`
 
     * Generated from tile-level logs (`hetero_gemm_bwtest2`); used in Section 3.
-  * The latency/speeddown table in Section 2 can be kept directly in this README as Markdown;
-    raw numbers come from the UART logs above.
 
 ---
 
