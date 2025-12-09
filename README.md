@@ -1,102 +1,283 @@
-![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
+> **Project navigation**
+>
+> | Branch                                                                                   | Project                                                                       |
+> | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+> | `chipyard_hetero`                                                                        | **(this branch)** Heterogeneous SoC Memory Contention: Diagnosis & Mitigation |
+> | [`chipyard_gemmini`](https://github.com/younghun-kim-dev/chipyard/tree/chipyard_gemmini) | Gemmini Offload Thresholds and Memory-Centric Pipeline Co-Design              |
+> | [`chipyard_sha3`](https://github.com/younghun-kim-dev/chipyard/tree/chipyard_sha3)       | SHA3 Accelerator Performance Stabilization in Chipyard                        |
 
-# Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
+---
 
-## Quick Links
+# Project Summary
 
-* **Latest Documentation**: https://chipyard.readthedocs.io/
-* **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
-* **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
+<p align="center">
+  <img src="figs/fig1_gemm_latency.png" width="520"/>
+</p>
 
-## Using Chipyard
+| Aspect          | Summary                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Problem**     | When a BOOM+Gemmini accelerator shares a single-channel DRAM + monolithic L2 with two Rocket cores, **co-run memory contention can slow a 256×256 GEMM by ≈3×**, even though the Gemmini compute array itself is unchanged.                                                                                                                                                                       |
+| **Method**      | Built a **heterogeneous co-run profiling framework** on a RISC-V SoC (BOOM + 2×Rocket + Gemmini) with a configurable DRAM/L2 topology. Ran a Gemmini GEMM (256×256×256) concurrently with two Rocket linear bandwidth stressors, sweeping stress sizes and memory configurations while logging **cycle-accurate per-hart/tile timing**.                                                           |
+| **Key results** | Under 8 MiB co-run stress, a single-channel, default L2 design slows Gemmini by **3.07×**. DRAM **channels alone** only modestly help. Adding **2 channels + 4 L2 banks** and retuning the memory controller recovers Gemmini latency from **552,077 → 207,392 cycles (~2.7× improvement)** and pulls 64×64 tile latencies into a **tight, predictable band** (≈3× faster and far less variable). |
 
-To get started using Chipyard, see the documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
+---
 
-## What is Chipyard
+## Project – Heterogeneous SoC Memory Contention: Diagnosis & Mitigation
 
-Chipyard is an open source framework for agile development of Chisel-based systems-on-chip.
-It will allow you to leverage the Chisel HDL, Rocket Chip SoC generator, and other [Berkeley][berkeley] projects to produce a [RISC-V][riscv] SoC with everything from MMIO-mapped peripherals to custom accelerators.
-Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [CVA6 (Ariane)][cva6]), vector units ([Saturn](saturn), [Ara](ara)), accelerators ([Gemmini][gemmini], [NVDLA][nvdla]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
-Chipyard supports multiple concurrent flows of agile hardware development, including software RTL simulation, FPGA-accelerated simulation ([FireSim][firesim]), automated VLSI flows ([Hammer][hammer]), and software workload generation for bare-metal and Linux-based systems ([FireMarshal][firemarshal]).
-Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb-bar] in the [Electrical Engineering and Computer Sciences Department][eecs] at the [University of California, Berkeley][berkeley].
+Goal: **Understand how shared-memory contention shapes accelerator behavior when workloads co-run on a RISC-V SoC, and how memory topology (channels, L2 banking) and scheduling can restore predictable speedups.**
 
-## Resources
+This project has three parts:
 
-* Chipyard Documentation: https://chipyard.readthedocs.io/
-* Chipyard (x FireSim) Tutorial: https://fires.im/tutorial-recent/
-* Chipyard Basics slides: https://fires.im/asplos23-slides-pdf/02_chipyard_basics.pdf
+1. **Co-run profiling framework** on a heterogeneous RISC-V SoC (BOOM + 2×Rocket + Gemmini).
+2. **One-shot GEMM stress sweeps** across DRAM/L2 configurations (1CH vs 2CH, default vs multi-bank L2).
+3. **Tile-level analysis** of Gemmini 64×64 subtiles under contention to quantify latency **predictability**, not just average throughput.
 
-## Need help?
+Raw logs live under `sims/verilator/**/` in this repo.
+This README uses compact figures and tables; full UART logs and cycle dumps remain in the run directories.
 
-* Join the Chipyard Mailing List: https://groups.google.com/forum/#!forum/chipyard
-* If you find a bug or would like propose a feature, post an issue on this repo: https://github.com/ucb-bar/chipyard/issues
+---
 
-## Contributing
+### 1. Heterogeneous SoC and Co-Run Profiling Framework
 
-* See [CONTRIBUTING.md](/CONTRIBUTING.md)
+**Question.** How do we reproduce, control, and measure shared-memory contention between CPU cores and a Gemmini accelerator on the same SoC?
 
-## Attribution and Chipyard-related Publications
+**Setup**
 
-If used for research, please cite Chipyard by the following publication:
+* **SoC topology (Chipyard configs)**
+  All experiments use a BOOM + 2×Rocket + Gemmini SoC, with variants such as:
 
-```
-@article{chipyard,
-  author={Amid, Alon and Biancolin, David and Gonzalez, Abraham and Grubb, Daniel and Karandikar, Sagar and Liew, Harrison and Magyar,   Albert and Mao, Howard and Ou, Albert and Pemberton, Nathan and Rigge, Paul and Schmidt, Colin and Wright, John and Zhao, Jerry and Shao, Yakun Sophia and Asanovi\'{c}, Krste and Nikoli\'{c}, Borivoje},
-  journal={IEEE Micro},
-  title={Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs},
-  year={2020},
-  volume={40},
-  number={4},
-  pages={10-21},
-  doi={10.1109/MM.2020.2996616},
-  ISSN={1937-4143},
-}
-```
+  * `GemminiLargeBoomV4Rocket2Config` – 1 DRAM channel, default L2.
+  * `GemminiLargeBoomV4Rocket22CHConfig` – **2 DRAM channels**, default L2.
+  * `GemminiLargeBoomV4Rocket22CHL24BanksConfig` – **2 DRAM channels + 4-bank L2**, tuned memory controller.
+  * (Exact filenames may differ slightly by commit; look for `GemminiLargeBoomV4Rocket2*` configs under `generators/chipyard/src/main/scala/config/`.)
 
-* **Chipyard**
-    * A. Amid, et al. *IEEE Micro'20* [PDF](https://ieeexplore.ieee.org/document/9099108).
-    * A. Amid, et al. *DAC'20* [PDF](https://ieeexplore.ieee.org/document/9218756).
-    * A. Amid, et al. *ISCAS'21* [PDF](https://ieeexplore.ieee.org/abstract/document/9401515).
+* **Cores / harts**
 
-These additional publications cover many of the internal components used in Chipyard. However, for the most up-to-date details, users should refer to the Chipyard docs.
+  * Hart 0 – **Rocket#1**: memory bandwidth stressor.
+  * Hart 1 – **Rocket#2**: independent memory bandwidth stressor.
+  * Hart 2 – **BOOM**: Gemmini host (runs GEMM kernels).
 
-* **Generators**
-    * **Rocket Chip**: K. Asanovic, et al., *UCB EECS TR*. [PDF](http://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.pdf).
-    * **BOOM**: C. Celio, et al., *Hot Chips 30*. [PDF](https://old.hotchips.org/hc30/1conf/1.03_Berkeley_BROOM_HC30.Berkeley.Celio.v02.pdf).
-      * **SonicBOOM (BOOMv3)**: J. Zhao, et al., *CARRV'20*. [PDF](https://carrv.github.io/2020/papers/CARRV2020_paper_15_Zhao.pdf).
-      * **COBRA (BOOM Branch Prediction)**: J. Zhao, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408173).
-    * **Gemmini**: H. Genc, et al., *DAC'21*. [PDF](https://arxiv.org/pdf/1911.09925).
-* **Sims**
-    * **FireSim**: S. Karandikar, et al., *ISCA'18*. [PDF](https://sagark.org/assets/pubs/firesim-isca2018.pdf).
-        * **FireSim Micro Top Picks**: S. Karandikar, et al., *IEEE Micro, Top Picks 2018*. [PDF](https://sagark.org/assets/pubs/firesim-micro-top-picks2018.pdf).
-        * **FASED**: D. Biancolin, et al., *FPGA'19*. [PDF](https://people.eecs.berkeley.edu/~biancolin/papers/fased-fpga19.pdf).
-        * **Golden Gate**: A. Magyar, et al., *ICCAD'19*. [PDF](https://davidbiancolin.github.io/papers/goldengate-iccad19.pdf).
-        * **FirePerf**: S. Karandikar, et al., *ASPLOS'20*. [PDF](https://sagark.org/assets/pubs/fireperf-asplos2020.pdf).
-        * **FireSim ISCA@50 Retrospective**: S. Karandikar, et al., *ISCA@50 Retrospective: 1996-2020*. [PDF](https://sites.coecis.cornell.edu/isca50retrospective/files/2023/06/Karandikar_2018_FireSim.pdf)
-* **Tools**
-    * **Chisel**: J. Bachrach, et al., *DAC'12*. [PDF](https://people.eecs.berkeley.edu/~krste/papers/chisel-dac2012.pdf).
-    * **FIRRTL**: A. Izraelevitz, et al., *ICCAD'17*. [PDF](https://ieeexplore.ieee.org/document/8203780).
-    * **Chisel DSP**: A. Wang, et al., *DAC'18*. [PDF](https://ieeexplore.ieee.org/document/8465790).
-    * **FireMarshal**: N. Pemberton, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408192).
-* **VLSI**
-    * **Hammer**: E. Wang, et al., *ISQED'20*. [PDF](https://www.isqed.org/English/Archives/2020/Technical_Sessions/113.html).
-    * **Hammer**: H. Liew, et al., *DAC'22*. [PDF](https://dl.acm.org/doi/abs/10.1145/3489517.3530672).
+* **Co-run benchmark binaries**
 
-## Acknowledgements
+  * `hetero_gemm_bwtest-baremetal`
 
-This work is supported by the NSF CCRI ENS Chipyard Award #2016662.
+    * One-shot Gemmini GEMM (256×256×256).
+    * Two Rocket linear “mem-stress” loops.
+    * Prints per-hart start/finish and Gemmini GEMM cycles.
+  * `hetero_gemm_bwtest2-baremetal`
 
-[hammer]:https://github.com/ucb-bar/hammer
-[firesim]:https://fires.im
-[ucb-bar]: http://bar.eecs.berkeley.edu
-[eecs]: https://eecs.berkeley.edu
-[berkeley]: https://berkeley.edu
-[riscv]: https://riscv.org/
-[rocket-chip]: https://github.com/freechipsproject/rocket-chip
-[boom]: https://github.com/riscv-boom/riscv-boom
-[firemarshal]: https://github.com/firesim/FireMarshal/
-[cva6]: https://github.com/openhwgroup/cva6/
-[gemmini]: https://github.com/ucb-bar/gemmini
-[nvdla]: http://nvdla.org/
-[saturn]: https://github.com/ucb-bar/saturn-vectors
-[ara]: https://github.com/pulp-platform/ara
+    * Same co-run setup, but **GEMM split into 16× 64×64 tiles**.
+    * Logs per-tile latency:
+      `"[tile i=0 j=0] im=64 jn=64 -> cycles=..."`.
+
+* **Memory stressors**
+
+  * Each Rocket runs a linear stream:
+    `stress = {2, 8, 16} MiB`, `stride = 64`, `passes = 1`.
+  * Output looks like:
+    `stress=8 MiB, stride=64, passes=1 -> cycles=2618658`.
+
+* **Simulator**
+
+  * Verilator harness with DRAMSim2 (`+dramsim`) for realistic main-memory timing.
+  * Very large `+max-cycles` to avoid premature termination under heavy stress.
+
+**Takeaways**
+
+* This framework lets us **dial contention up and down** (via stress size and topology) while recording:
+
+  * per-hart completion cycles, and
+  * per-tile Gemmini latencies.
+* It provides a reusable way to ask:
+  **“When do accelerator speedups survive co-run contention, and when do they collapse?”**
+
+---
+
+### 2. One-Shot GEMM under Co-Run Memory Stress
+
+**Question.** For a 256×256×256 Gemmini GEMM co-running with two Rocket bandwidth stressors, how do different DRAM/L2 topologies affect end-to-end latency?
+
+#### Setup (one-shot GEMM runs)
+
+* **GEMM workload**: 256×256 × 256×256, Gemmini WS-style kernel.
+* **Co-run stress**: two Rocket harts, each streaming **2, 8, or 16 MiB** linearly from DRAM (stride 64).
+* **Metrics**:
+
+  * Gemmini GEMM cycles from UART log:
+    `[BOOM GEMM] GEMM 256x256 * 256x256 -> cycles=...`
+  * Slowdown vs **no-stress baseline**.
+
+#### Summary table – one-shot GEMM latency
+
+Speedups are shown as **slowdown vs baseline** (higher = worse). Baseline is `GemminiLargeBoomV4Rocket2Config` with almost no co-run stress.
+
+| Config                          | Stress per Rocket | GEMM cycles |                 Slowdown vs baseline |
+| ------------------------------- | ----------------- | ----------: | -----------------------------------: |
+| 1CH, default L2 (baseline)      | ≈0 MiB            |     180,096 |                                1.00× |
+| 1CH, default L2                 | 2 MiB             |     207,074 |                                1.15× |
+| 1CH, default L2                 | 8 MiB             |     552,077 |                                3.07× |
+| 1CH, default L2                 | 16 MiB            |     552,077 |                    3.07× (saturated) |
+| 2CH, default L2                 | 8 MiB             |     521,146 |                                2.89× |
+| **2CH + 4 L2 banks (tuned MC)** | **8 MiB**         | **207,392** | **1.15× (~2.7× better vs 1CH/8MiB)** |
+
+* Baseline (≈180k cycles) is essentially Gemmini running alone.
+* With a **single DRAM channel and default L2**, 8–16 MiB co-run stress pushes GEMM to **≈552k cycles (3.07× slowdown)** and **additional stress no longer changes latency** → DRAM/L2 are fully bandwidth-limited.
+* Adding a **second DRAM channel alone** helps only slightly (≈2.89× slowdown).
+* Combining **2 channels + 4 L2 banks + memory-controller tuning** pulls the 8 MiB run **back to ~207k cycles**, almost matching the low-stress 2 MiB case (1.15× slowdown).
+
+#### Figure – GEMM latency vs topology and stress
+
+(Place this PNG under `figs/`.)
+
+<p align="center">
+  <img src="figs/fig1_gemm_latency.png" width="520"/>
+</p>
+
+* x-axis: `(Config / stress)` pairs.
+* y-axis: `256×256 GEMM latency (cycles)`.
+* Each bar is annotated with slowdown vs baseline (`1.00×`, `3.07×`, etc.).
+
+**Takeaways**
+
+* **Shared-memory contention alone** (no change to Gemmini array) can turn a 256×256 GEMM from **180k → 552k cycles (~3× slower)**.
+* **DRAM channels without L2 changes** are not enough; co-run traffic still fights through a narrow shared path.
+* **2CH + 4-bank L2 + tuned controller** recovers **≈2.7× throughput under the same 8 MiB co-run stress**, showing that:
+
+  * real accelerator behavior is dominated by **memory topology and contention**, not raw compute.
+
+---
+
+### 3. Tile-Level Behavior and Predictable Performance Bands
+
+**Question.** Under the same 8 MiB co-run stress, how do different memory topologies affect **per-tile Gemmini latency and its variability**?
+
+To answer this, `hetero_gemm_bwtest2-baremetal` splits the 256×256 GEMM into **16 tiles of 64×64**, logs per-tile cycles, and runs under the same three-hart co-run setup.
+
+#### Setup (tile-level runs)
+
+* **Configs compared**
+
+  * `GemminiLargeBoomV4Rocket2Config` – 1CH, default L2.
+  * `GemminiLargeBoomV4Rocket22CHL24BanksConfig` – 2CH + 4-bank L2 (tuned MC).
+* **Stress**: 8 MiB per Rocket (same as the “worst” one-shot case).
+* **Metric**: each tile line:
+  `"[tile i=0 j=0] im=64 jn=64 -> cycles=..."`.
+
+From the logs:
+
+* **1CH, default L2 (8 MiB stress)**
+
+  * Tile latencies (16 tiles):
+    `52,327, 42,007, 42,446, 40,489, 44,006, 37,848, …, 37,520, 38,180`
+  * Mean ≈ **40,519 cycles**, std-dev ≈ **3,817 cycles**.
+* **2CH + 4 L2 banks (8 MiB stress)**
+
+  * Tile latencies:
+    `16,716, 14,675, 14,836, 13,280, 13,978, 13,168, …, 13,211, 13,318`
+  * Mean ≈ **13,745 cycles**, std-dev ≈ **948 cycles**.
+
+So, under identical 8 MiB stress:
+
+* **Average tile latency** improves by ≈ **2.95×** (40.5k → 13.7k).
+* **Variability** shrinks by ≈ **4×** (std-dev 3.8k → 0.95k).
+
+#### Figure – tile latency distributions (1CH vs 2CH+4L2)
+
+(Place this PNG under `figs/`.)
+
+<p align="center">
+  <img src="figs/fig2_tile_latency.png" width="520"/>
+</p>
+
+* x-axis:
+
+  * `1CH / default L2 / 8 MiB stress`
+  * `2CH + 4 L2 banks / 8 MiB stress`
+* y-axis: `64×64 tile latency (cycles)`.
+* Each box shows the distribution of 16 tile latencies for that config; points are individual tiles.
+
+**Takeaways**
+
+* With **1CH + default L2**, tile latencies are:
+
+  * **slow** (~40k cycles/tile) and
+  * **jittery** (large spread, first tile up at 52k).
+* With **2CH + 4-bank L2**, tile latencies are:
+
+  * **fast** (~13.7k cycles/tile) and
+  * **tightly clustered** (all tiles within a narrow band).
+
+This figure shows that the tuned memory topology does more than raise average throughput—it keeps accelerator performance in a **tight, predictable band**, even under strong co-run contention.
+That directly supports the broader research goal: **accelerators that keep their promises under shared-memory constraints.**
+
+---
+
+## Code / Config Map (where to look in this repo)
+
+Pointers from this high-level story to concrete code and logs in the `chipyard_hetero` branch:
+
+* **SoC + memory configs (Chipyard)**
+
+  * `generators/chipyard/src/main/scala/config/`
+
+    * Look for configs named like:
+
+      * `GemminiLargeBoomV4Rocket2Config`
+      * `GemminiLargeBoomV4Rocket22CHConfig`
+      * `GemminiLargeBoomV4Rocket22CHL24BanksConfig`
+    * These set the **BOOM+Rocket+Gemmini topology**, DRAM channel count, and L2 banking.
+  * Additional mixins (names may vary slightly by commit) define:
+
+    * DRAM channel count (1CH vs 2CH).
+    * L2 bank count (1 vs 4).
+    * Memory-controller parameters used in the tuned config.
+
+* **Co-run benchmarks (Gemmini ROCC tests)**
+
+  * `generators/gemmini/software/gemmini-rocc-tests/`
+
+    * `hetero_gemm_bwtest.c`
+
+      * Implements the **one-shot 256×256 GEMM + 2×Rocket mem-stress** experiment.
+      * Prints hart start/finish and `[BOOM GEMM] GEMM ... -> cycles=...`.
+    * `hetero_gemm_bwtest2.c`
+
+      * Same co-run setup, but logs **16 tile latencies** for 64×64 sub-GEMMs.
+  * Built binaries:
+
+    * `build/bareMetalC/hetero_gemm_bwtest-baremetal`
+    * `build/bareMetalC/hetero_gemm_bwtest2-baremetal`
+
+* **Verilator runs & logs**
+
+  * `sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket2Config/hetero_gemm_bwtest-baremetal.log`
+
+    * 1CH, default L2 runs (baseline, 2/8/16 MiB stress).
+  * `sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket22CHConfig/hetero_gemm_bwtest-baremetal.log`
+
+    * 2CH, default L2 runs.
+  * `sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket22CHL24BanksConfig/hetero_gemm_bwtest-baremetal.log`
+
+    * 2CH + 4-bank L2 tuned runs (2.7× recovery).
+  * `sims/verilator/output/chipyard.harness.TestHarness.GemminiLargeBoomV4Rocket2*/hetero_gemm_bwtest2-baremetal.log`
+
+    * Tile-level logs (16× tile latencies) for both 1CH and 2CH+4L2 configs.
+
+* **Figures and tables**
+
+  * `figs/fig1_gemm_latency.png`
+
+    * Generated from one-shot GEMM logs; used in the Project Summary and Section 2.
+  * `figs/fig2_tile_latency.png`
+
+    * Generated from tile-level logs (`hetero_gemm_bwtest2`); used in Section 3.
+  * The latency/speeddown table in Section 2 can be kept directly in this README as Markdown;
+    raw numbers come from the UART logs above.
+
+---
+
+This layout lets a reader (or admissions committee) quickly map the CV/SOP line:
+
+> “Investigated how shared-memory contention shapes accelerator behavior on a BOOM–Rocket–Gemmini SoC, built a co-run profiling framework with cycle-accurate logging, diagnosed ~3× slowdowns from DRAM/L2 contention, and recovered up to 2.7× throughput via 2-channel, 4-bank L2 memory-path tuning that keeps accelerator performance in a tight, predictable band.”
+
+to **specific configs, binaries, logs, and figures** in this branch.
