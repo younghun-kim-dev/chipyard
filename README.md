@@ -11,7 +11,7 @@
 # Project Summary
 
 <p align="center">
-  <img src="figs/sha3_speedup_vs_size_with_arrow_colored.png" width="650"/>
+  <img src="figs/sha3_speedup_vs_size_with_arrow_colored.png" width="800"/>
 </p>
 
 | Aspect | Summary |
