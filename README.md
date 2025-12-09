@@ -10,10 +10,29 @@
 
 # Project Summary
 
-| 1. RocketConfig WS/OS baseline | 2. BOOM+Gemmini memory-pipeline optimization | 3. Offload threshold K\* (Boom+Gemmini) |
-| --- | --- | --- |
-| <img src="figs/gemminirocket_mac100_vs_M.png" width="260"/> | <img src="figs/boomgemmini_mac100_before_after.png" width="260"/> | **K\*** examples: 4×4 → none, 8×8 → 5, 12×12 → 1 |
-| Even a simple Rocket+Gemmini shows an overhead-dominated → bandwidth-dominated transition; WS consistently beats OS. | Memory-path co-design (SPM/ACC, bus, DMA) raises WS 1024³ throughput by ≈58% and improves OS as well. | Offloading is not always good: K\* depends strongly on tile size/shape and reflects when Gemmini actually beats the CPU. |
+### 1. RocketConfig WS/OS baseline (Rocket + Gemmini)
+
+<img src="figs/gemminirocket_mac100_vs_M.png" width="320"/>
+
+- Characterizes GEMM WS/OS scaling on a simple Rocket+Gemmini SoC.
+- Reveals the transition from **launch/overhead-dominated** to **bandwidth/tiling-limited** regimes; WS is consistently more efficient than OS.
+
+---
+
+### 2. BOOM+Gemmini memory-pipeline optimization (V4 → V43)
+
+<img src="figs/boomgemmini_mac100_before_after.png" width="320"/>
+
+- Co-designs Gemmini’s **SPM/ACC banking, system bus width, and DMA width**.
+- Raises WS throughput at \(1024^3\) by ≈**58%** (and improves OS as well), showing that the missing speedup was largely in the **memory path**, not the MAC array.
+
+---
+
+### 3. CPU vs Gemmini offload threshold K\* (Boom + Gemmini)
+
+- Builds a CPU vs Gemmini **offload-threshold pipeline** on `GemminiLargeBoomV4Config`.
+- Example thresholds: **4×4 → no offload**, **8×8 → K\*=5**, **12×12 → K\*=1**.
+- Demonstrates that offloading is **not always beneficial**; K\*(M,N) depends strongly on tile size/shape and memory behavior.
 
 ---
 
@@ -58,6 +77,18 @@ The tables below are small, high-level summaries.
   - **Small matrices (≤ 32)**: dominated by launch + data-movement overheads.
   - **Large matrices (≥ 256)**: MAC/100cyc plateaus → **bandwidth / tiling limits** dominate.
 - WS is consistently faster and more efficient than OS at all sizes.
+
+#### Additional WS/OS tile-shape heatmaps (K = 256)
+
+(These heatmaps are derived from the WS/OS sweep results in  
+`chipyard_hetero/sims/verilator/out-sweep-20251015-042642/results.csv` in the `chipyard_hetero` branch.)
+
+![WS MAC/100cyc heatmap (K=256)](figs/rocket_ws_mac100_K256_heatmap.png)
+
+![OS MAC/100cyc heatmap (K=256)](figs/rocket_os_mac100_K256_heatmap.png)
+
+- Visualizes how **tile shape (M,N)** affects throughput for WS and OS at fixed K=256.
+- WS achieves higher MAC/100cyc across the board; near-square tiles are noticeably more efficient than very skinny ones.
 
 #### Summary table (RocketConfig, WS vs OS)
 
