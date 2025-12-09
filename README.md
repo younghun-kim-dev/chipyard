@@ -85,7 +85,7 @@ Raw logs and CSVs live under `sims/verilator/**/` in this repo.
 `chipyard_hetero/sims/verilator/out-sweep-20251015-042642/results.csv` in the `chipyard_hetero` branch.)
 
 <p align="center">
-  <img src="/rocket_ws_mac100_K256_heatmap.png" width="500"/>
+  <img src="figs/rocket_ws_mac100_K256_heatmap.png" width="500"/>
 </p>
 
 <p align="center">
