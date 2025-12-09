@@ -50,8 +50,7 @@ This project has three parts:
 2. Memory-pipeline optimization on a BOOM+Gemmini SoC (before vs. after)  
 3. CPU vs. Gemmini offload-threshold sweeps (K\* finder)
 
-Raw logs and CSVs live under `sims/verilator/**/` in this repo.  
-The tables below are small, high-level summaries.
+Raw logs and CSVs live under `sims/verilator/**/` in this repo.
 
 ---
 
@@ -70,8 +69,6 @@ The tables below are small, high-level summaries.
 
 #### Figures
 
-(Place these PNGs under `figs/`.)
-
 ![Cycles vs matrix size (RocketConfig)](figs/gemminirocket_cycles_vs_M.png)
 
 ![MAC/100cyc vs matrix size (RocketConfig)](figs/gemminirocket_mac100_vs_M.png)
@@ -88,7 +85,7 @@ The tables below are small, high-level summaries.
 `chipyard_hetero/sims/verilator/out-sweep-20251015-042642/results.csv` in the `chipyard_hetero` branch.)
 
 <p align="center">
-  <img src="figs/rocket_ws_mac100_K256_heatmap.png" width="500"/>
+  <img src="/rocket_ws_mac100_K256_heatmap.png" width="500"/>
 </p>
 
 <p align="center">
@@ -141,8 +138,6 @@ The tables below are small, high-level summaries.
 - Metric: MAC/100cyc (throughput), plus total cycles
 
 #### Figure
-
-(Place under `figs/`.)
 
 ![WS/OS MAC/100cyc vs matrix size – before and after memory-pipeline optimization](figs/boomgemmini_mac100_before_after.png)
 
