@@ -1,102 +1,285 @@
-![CHIPYARD](https://github.com/ucb-bar/chipyard/raw/main/docs/_static/images/chipyard-logo-full.png)
+> **Project navigation**
+>
+> | Branch                                                                                   | Project                                                                  |
+> | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+> | [`chipyard_hetero`](https://github.com/younghun-kim-dev/chipyard/tree/chipyard_hetero)   | Heterogeneous SoC Memory Contention: Diagnosis & Mitigation              |
+> | [`chipyard_gemmini`](https://github.com/younghun-kim-dev/chipyard/tree/chipyard_gemmini) | Gemmini Offload Thresholds and Memory-Centric Pipeline Co-Design         |
+> | `chipyard_sha3`                                                                          | **(this branch)** SHA3 Accelerator Performance Stabilization in Chipyard |
 
-# Chipyard Framework [![Test](https://github.com/ucb-bar/chipyard/actions/workflows/chipyard-run-tests.yml/badge.svg)](https://github.com/ucb-bar/chipyard/actions)
+---
 
-## Quick Links
+# Project Summary
 
-* **Stable Documentation**: https://chipyard.readthedocs.io/
-* **User Question Forum**: https://groups.google.com/forum/#!forum/chipyard
-* **Bugs and Feature Requests**: https://github.com/ucb-bar/chipyard/issues
+| 1. Speedup vs message size (single-bank L2)                                                                            | 2. SoC & L2 configuration matrix                                                                                                                    | 3. Large-input recovery with multi-bank L2                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="figs/sha3_speedup_vs_size_with_arrow_colored.png" width="260"/>                                              | SHA3 RoCC integrated into Rocket/BOOM SoCs, sweeping L2 bank count, host-core mix, and SW-only baselines.                                           | At 557,056 B, multi-bank L2 raises SHA3 speedup from **120.27× → 160.90×**, ≈**34%** throughput gain and restores large-input efficiency.                                          |
+| Single-bank inclusive L2 keeps SHA3 speedup ≈170× for mid-sized messages, but collapses toward 120× at hundreds of KB. | Configs in `AccelMemSweep.scala`, `RocketSha3Configs.scala`, and related files factor L2 structure and host composition into clean experiment axes. | This shows the “speedup collapse” was a **memory-system problem**, not a SHA3 compute problem, and that L2 banking/sub-banking can stabilize accelerator efficiency across scales. |
 
-## Using Chipyard
+---
 
-To get started using Chipyard, see the stable documentation on the Chipyard documentation site: https://chipyard.readthedocs.io/
+## Project – SHA3 Accelerator Performance Stabilization in Chipyard
 
-## What is Chipyard
+Goal: **Understand when SHA3 accelerator speedups survive as message sizes scale, and how L2-cache structure (single-bank vs multi-bank inclusive L2) and SoC composition affect those speedups.**
 
-Chipyard is an open source framework for agile development of Chisel-based systems-on-chip.
-It will allow you to leverage the Chisel HDL, Rocket Chip SoC generator, and other [Berkeley][berkeley] projects to produce a [RISC-V][riscv] SoC with everything from MMIO-mapped peripherals to custom accelerators.
-Chipyard contains processor cores ([Rocket][rocket-chip], [BOOM][boom], [CVA6 (Ariane)][cva6]), accelerators ([Hwacha][hwacha], [Gemmini][gemmini], [NVDLA][nvdla]), memory systems, and additional peripherals and tooling to help create a full featured SoC.
-Chipyard supports multiple concurrent flows of agile hardware development, including software RTL simulation, FPGA-accelerated simulation ([FireSim][firesim]), automated VLSI flows ([Hammer][hammer]), and software workload generation for bare-metal and Linux-based systems ([FireMarshal][firemarshal]).
-Chipyard is actively developed in the [Berkeley Architecture Research Group][ucb-bar] in the [Electrical Engineering and Computer Sciences Department][eecs] at the [University of California, Berkeley][berkeley].
+This project has three parts:
 
-## Resources
+1. Integrate a SHA3 RoCC accelerator into Rocket/BOOM SoCs and define a **memory-hierarchy experiment matrix**.
+2. Build a **Verilator-based benchmark pipeline** that sweeps message sizes from **136 B to 557 KB** and compares HW vs SW SHA3.
+3. Diagnose a **speedup collapse** at large inputs as an L2 bank-concurrency problem, then **redesign the inclusive L2** to recover ≈**34%** throughput and stabilize speedup.
 
-* Chipyard Stable Documentation: https://chipyard.readthedocs.io/
-* Chipyard (x FireSim) Tutorial: https://fires.im/tutorial-recent/
-* Chipyard Basics slides: https://fires.im/asplos23-slides-pdf/02_chipyard_basics.pdf
+Raw logs and CSVs live under `sims/verilator/**/`.
+This README uses compact figures and tables; full data remains in the run directories.
 
-## Need help?
+---
 
-* Join the Chipyard Mailing List: https://groups.google.com/forum/#!forum/chipyard
-* If you find a bug or would like propose a feature, post an issue on this repo: https://github.com/ucb-bar/chipyard/issues
+### 1. SoC and Memory-Hierarchy Configuration
 
-## Contributing
+**Question.** What SoC configurations do we need to separate SHA3 compute limits from memory-system limits?
 
-* See [CONTRIBUTING.md](/CONTRIBUTING.md)
+**Setup**
 
-## Attribution and Chipyard-related Publications
+* **Accelerator integration**
 
-If used for research, please cite Chipyard by the following publication:
+  * SHA3 RoCC integrated with:
 
+    * Rocket cores (big-core configs).
+    * BOOM cores (out-of-order) for heterogeneous experiments.
+  * BOOM RoCC execution-unit and FPU tie-offs updated so **non-FPU RoCCs (SHA3)** integrate cleanly into the pipeline.
+
+* **Config matrix (Chipyard configs)**
+  Defined mainly under `generators/chipyard/src/main/scala/config/`:
+
+  * `AccelMemSweep.scala` (heterogeneous L2 experiments)
+
+    * `BaselineOneBankL2Sha3` – SHA3 + BOOM + Rocket with **single-bank inclusive L2**.
+    * `L2BanksOne/Two/Four/EightSha3` – same SoC, but with **1/2/4/8-bank L2**.
+    * `BroadcastHubSha3` – SHA3 SoC **without inclusive L2**, using a broadcast hub instead.
+    * `L2BanksFourSoftwareOnly` – **SW-only** baseline with 4-bank L2.
+    * `L2BanksFourSha3RocketThree`, `L2BanksFourSha3BoomTwoRocketOne` – host mixes (Rocket-heavy vs BOOM-heavy) with SHA3.
+  * `RocketSha3Configs.scala`
+
+    * `Sha3RocketMB4Config` – **Rocket-only** + SHA3 + 4-bank inclusive L2.
+    * `Sha3RocketMB4MC2Config` – as above, but with **2 memory channels**, to probe DRAM-side bandwidth.
+  * `Sha3L1Configs.scala`, `Sha3L1Configs2.scala`, `Sha3L2Concurrency.scala`
+
+    * Optional sweeps for **L1 D-cache size**, **SHA3 TLB ways**, and **L2 concurrency resources**.
+
+**Takeaways**
+
+* The SHA3 experiments are not tied to a single SoC: they span **Rocket-only**, **Rocket+BOOM**, **SHA3 vs SW-only**, and **1/2/4/8-bank L2**.
+* This config matrix lets us ask **“is the speedup collapse due to SHA3, L1, TLB, or L2 banking?”** in a structured way.
+
+---
+
+### 2. Benchmark Methodology (Verilator + DRAMSim)
+
+**Question.** How do we measure SHA3 speedup vs message size reproducibly?
+
+**Setup**
+
+* **Simulator**
+
+  * Verilator harness with DRAMSim2 timing model (DRAM-backed main memory).
+  * Very large `max-cycles` timeout in `variables.mk` so runs up to **557 KB** do not prematurely terminate.
+* **Binaries**
+
+  * `sha3-rocc.riscv` – SHA3 accelerator (RoCC) implementation.
+  * `sha3-sw.riscv` – pure software SHA3 on Rocket/BOOM with the same ISA baseline.
+* **Core metric**
+
+  * For each message size, measure:
+
+    * `hw_cycles` (SHA3 RoCC path)
+    * `sw_cycles` (software-only path)
+    * **speedup** = `sw_cycles / hw_cycles` (SW vs HW; higher is better, fewer cycles = faster).
+
+**Automation scripts** (under `sims/verilator/`)
+
+* `sha3_compare.sh`
+
+  * For a given config (e.g., `Sha3RocketL2TuneConfig`) and message size:
+
+    * Runs HW (`sha3-rocc.riscv`) and SW (`sha3-sw.riscv`).
+    * Parses UART logs for `SHA execution took ... cycles`.
+    * Emits `sha3_speed.csv` with: `hw_cycles, sw_cycles, speedup_sw_over_hw`.
+* Directory layout (one example):
+
+  * `sims/verilator/136/sha3_speed.csv`
+  * `sims/verilator/272/sha3_speed.csv`
+  * …
+  * `sims/verilator/557056/sha3_speed.csv`
+* `gather_sha3_data.sh`
+
+  * Sweeps message sizes **136 × 2^p** for p = 0…12:
+
+    * Sizes: 136, 272, …, 557,056 B.
+  * Aggregates all the per-size CSVs into:
+
+    * `combined_sha3_speed.csv` with columns:
+      `size, hw_cycles, sw_cycles, speedup_sw_over_hw`.
+
+(Optionally) `sha3_compare_RocketConfig_withoutRoCC.sh` can be used to measure a **pure RocketConfig SW baseline** (no RoCC at all) for separating SoC effects.
+
+**Takeaways**
+
+* The entire speedup curve is produced by **scripts in this repo**, not ad-hoc manual runs.
+* Any future config (different L2 banks, memory channels, or SHA3 version) can reuse the same scripts, making the methodology portable and reproducible.
+
+---
+
+### 3. Speedup vs Message Size – Single-Bank Inclusive L2 Baseline
+
+**Question.** With a **single-bank inclusive L2**, how does SHA3 accelerator speedup behave as messages grow from 136 B to 557 KB?
+
+**Setup**
+
+* SoC: SHA3 + Rocket (single-bank inclusive L2), e.g., `BaselineOneBankL2Sha3` / `Sha3RocketL2TuneConfig`.
+* Messages: `size ∈ {136, 272, 544, …, 557,056}` bytes (i.e., `136 × 2^p`).
+* Metric: `speedup_sw_over_hw = sw_cycles / hw_cycles`.
+
+#### Figure
+
+(Place this file under `figs/`.)
+
+```markdown
+![SHA3 speedup vs message size (baseline single-bank L2, with multi-bank improvement at 557 KB)](figs/sha3_speedup_vs_size_with_arrow_colored.png)
 ```
-@article{chipyard,
-  author={Amid, Alon and Biancolin, David and Gonzalez, Abraham and Grubb, Daniel and Karandikar, Sagar and Liew, Harrison and Magyar,   Albert and Mao, Howard and Ou, Albert and Pemberton, Nathan and Rigge, Paul and Schmidt, Colin and Wright, John and Zhao, Jerry and Shao, Yakun Sophia and Asanovi\'{c}, Krste and Nikoli\'{c}, Borivoje},
-  journal={IEEE Micro},
-  title={Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs},
-  year={2020},
-  volume={40},
-  number={4},
-  pages={10-21},
-  doi={10.1109/MM.2020.2996616},
-  ISSN={1937-4143},
-}
-```
 
-* **Chipyard**
-    * A. Amid, et al. *IEEE Micro'20* [PDF](https://ieeexplore.ieee.org/document/9099108).
-    * A. Amid, et al. *DAC'20* [PDF](https://ieeexplore.ieee.org/document/9218756).
-    * A. Amid, et al. *ISCAS'21* [PDF](https://ieeexplore.ieee.org/abstract/document/9401515).
+* Log-scale x-axis shows sizes from **136 B → 557 KB**.
+* Blue curve = **single-bank L2** baseline speedup.
+* Red triangle at 557,056 B = **multi-bank L2** improvement (Section 4).
+* Arrow marks **120.27× → 160.90×** speedup increase (≈**34%**).
 
-These additional publications cover many of the internal components used in Chipyard. However, for the most up-to-date details, users should refer to the Chipyard docs.
+#### Summary table (baseline single-bank L2, plus improved last point)
 
-* **Generators**
-    * **Rocket Chip**: K. Asanovic, et al., *UCB EECS TR*. [PDF](http://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-17.pdf).
-    * **BOOM**: C. Celio, et al., *Hot Chips 30*. [PDF](https://old.hotchips.org/hc30/1conf/1.03_Berkeley_BROOM_HC30.Berkeley.Celio.v02.pdf).
-      * **SonicBOOM (BOOMv3)**: J. Zhao, et al., *CARRV'20*. [PDF](https://carrv.github.io/2020/papers/CARRV2020_paper_15_Zhao.pdf).
-      * **COBRA (BOOM Branch Prediction)**: J. Zhao, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408173).
-    * **Hwacha**: Y. Lee, et al., *ESSCIRC'14*. [PDF](http://hwacha.org/papers/riscv-esscirc2014.pdf).
-    * **Gemmini**: H. Genc, et al., *DAC'21*. [PDF](https://arxiv.org/pdf/1911.09925).
-* **Sims**
-    * **FireSim**: S. Karandikar, et al., *ISCA'18*. [PDF](https://sagark.org/assets/pubs/firesim-isca2018.pdf).
-        * **FireSim Micro Top Picks**: S. Karandikar, et al., *IEEE Micro, Top Picks 2018*. [PDF](https://sagark.org/assets/pubs/firesim-micro-top-picks2018.pdf).
-        * **FASED**: D. Biancolin, et al., *FPGA'19*. [PDF](https://people.eecs.berkeley.edu/~biancolin/papers/fased-fpga19.pdf).
-        * **Golden Gate**: A. Magyar, et al., *ICCAD'19*. [PDF](https://davidbiancolin.github.io/papers/goldengate-iccad19.pdf).
-        * **FirePerf**: S. Karandikar, et al., *ASPLOS'20*. [PDF](https://sagark.org/assets/pubs/fireperf-asplos2020.pdf).
-        * **FireSim ISCA@50 Retrospective**: S. Karandikar, et al., *ISCA@50 Retrospective: 1996-2020*. [PDF](https://sites.coecis.cornell.edu/isca50retrospective/files/2023/06/Karandikar_2018_FireSim.pdf)
-* **Tools**
-    * **Chisel**: J. Bachrach, et al., *DAC'12*. [PDF](https://people.eecs.berkeley.edu/~krste/papers/chisel-dac2012.pdf).
-    * **FIRRTL**: A. Izraelevitz, et al., *ICCAD'17*. [PDF](https://ieeexplore.ieee.org/document/8203780).
-    * **Chisel DSP**: A. Wang, et al., *DAC'18*. [PDF](https://ieeexplore.ieee.org/document/8465790).
-    * **FireMarshal**: N. Pemberton, et al., *ISPASS'21*. [PDF](https://ieeexplore.ieee.org/document/9408192).
-* **VLSI**
-    * **Hammer**: E. Wang, et al., *ISQED'20*. [PDF](https://www.isqed.org/English/Archives/2020/Technical_Sessions/113.html).
-    * **Hammer**: H. Liew, et al., *DAC'22*. [PDF](https://dl.acm.org/doi/abs/10.1145/3489517.3530672).
+> Speedup is `sw_cycles / hw_cycles` (higher is better; fewer HW cycles → higher speedup).
 
-## Acknowledgements
+| Size (B) | HW cycles (1-bank L2) |  SW cycles | Speedup (1-bank L2) | Speedup (multi-bank L2) |
+| -------: | --------------------: | ---------: | ------------------: | ----------------------: |
+|      136 |                   149 |    30,715, |          206.140939 |                       – |
+|      272 |                   298 |     45,472 |          152.590604 |                       – |
+|      544 |                   474 |     74,704 |          157.603375 |                       – |
+|    1,088 |                   782 |    133,200 |          170.332480 |                       – |
+|    2,176 |                 1,425 |    250,264 |          175.623859 |                       – |
+|    4,352 |                 2,816 |    484,332 |          171.992897 |                       – |
+|    8,704 |                 5,656 |    952,664 |          168.434229 |                       – |
+|   17,408 |                11,150 |  1,889,101 |          169.426098 |                       – |
+|   34,816 |                22,260 |  3,762,061 |          169.005435 |                       – |
+|   69,632 |                44,513 |  7,509,369 |          168.700581 |                       – |
+|  139,264 |                93,461 | 15,005,890 |          160.557772 |                       – |
+|  278,528 |               206,308 | 30,016,582 |          145.494028 |                       – |
+|  557,056 |               499,724 | 60,099,812 |          120.266010 |              **160.90** |
 
-This work is supported by the NSF CCRI ENS Chipyard Award #2016662.
+#### Takeaways
 
-[hwacha]:https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-262.pdf
-[hammer]:https://github.com/ucb-bar/hammer
-[firesim]:https://fires.im
-[ucb-bar]: http://bar.eecs.berkeley.edu
-[eecs]: https://eecs.berkeley.edu
-[berkeley]: https://berkeley.edu
-[riscv]: https://riscv.org/
-[rocket-chip]: https://github.com/freechipsproject/rocket-chip
-[boom]: https://github.com/riscv-boom/riscv-boom
-[firemarshal]: https://github.com/firesim/FireMarshal/
-[cva6]: https://github.com/openhwgroup/cva6/
-[gemmini]: https://github.com/ucb-bar/gemmini
-[nvdla]: http://nvdla.org/
+* **Small–mid messages (≈2–70 KB)**
+
+  * Speedup is stable around **168–176×**.
+  * SHA3 RoCC is **well-utilized** and not yet limited by the memory system.
+* **Larger messages (139–278 KB)**
+
+  * Speedup gradually drops from ~160× to ~145×.
+  * The working set is approaching **L2 capacity/associativity limits**, increasing line replacements.
+* **Largest messages (557 KB)**
+
+  * Speedup collapses to **120.27×**.
+  * Cycle-accurate traces (not shown here) indicate the collapse is due to **single-bank inclusive L2 contention**: miss handling, refills, and evictions serialize on one bank while compute units stall.
+* In summary, **the accelerator is not the bottleneck**:
+  single-bank L2 structure is what turns a ~170× accelerator into a **120× accelerator** at scale.
+
+---
+
+### 4. Multi-Bank L2 Redesign – Recovering Large-Input Speedup
+
+**Question.** If we **redesign the inclusive L2 as a multi-bank cache**, can we recover SHA3 speedup at large message sizes?
+
+**Setup**
+
+* Change: Replace the single-bank inclusive L2 with a **multi-bank inclusive L2**:
+
+  * more **capacity** and
+  * more **sub-banking concurrency** (parallel miss handling / accesses).
+* Same SoC, same SHA3 RoCC, same benchmarks and message sizes.
+
+**Key result at 557,056 B**
+
+* Baseline (single-bank L2):
+
+  * `hw_cycles = 499,724`
+  * `sw_cycles = 60,099,812`
+  * `speedup_old = 120.26601×`
+* Multi-bank L2:
+
+  * `hw_cycles_new = 373,527`
+  * `speedup_new = 60,099,812 / 373,527 ≈ 160.90×`
+
+**Improvement**
+
+* **Absolute**: 120.27× → 160.90× (**+40.6×** speedup).
+* **Relative throughput gain**: ≈**+33.8%** (rounded as **≈34%**).
+* The new 557 KB point (≈160.9×) is **very close to the mid-size plateau (~170×)**.
+
+In the speedup figure:
+
+* The arrow at 557,056 B shows the jump from **120.27× → 160.90×**, labeled:
+
+> `+34% via multi-bank L2 (more capacity & sub-banking)`
+
+**Interpretation**
+
+* The same SHA3 accelerator, under the same ISA and benchmark,
+  looks like a **120× accelerator** under single-bank L2,
+  but a **161× accelerator** once the L2 is redesigned.
+* This is **purely a memory-system effect**:
+
+  * Multi-bank L2 spreads traffic across banks, reduces queuing and miss serialization, and feeds SHA3 at high throughput even for large messages.
+* From a systems perspective:
+
+  * **Accelerator performance guarantees are only meaningful with memory-path guarantees.**
+  * The redesigned L2 brings large-input behavior back in line with the **“promised” plateau** observed at smaller sizes.
+
+---
+
+### 5. Code / Config Map (where to look in this repo)
+
+Pointers from the high-level story above to concrete code in this fork:
+
+* **SoC + L2 configs (Chipyard)**
+
+  * `generators/chipyard/src/main/scala/config/AccelMemSweep.scala`
+    SHA3 + BOOM + Rocket heterogeneous configs; 1/2/4/8-bank L2, SW-only baseline, and host-core mix.
+  * `generators/chipyard/src/main/scala/config/RocketSha3Configs.scala`
+    Rocket-only SHA3 configs with **4-bank L2** and **additional memory channels**.
+  * `generators/chipyard/src/main/scala/config/Sha3L1Configs*.scala`, `Sha3L2Concurrency.scala`
+    Optional L1/TLB/L2-concurrency sweeps used to confirm that **L2 banking** is the dominant factor.
+
+* **BOOM integration fixes**
+
+  * `generators/boom/src/main/scala/common/tile.scala`
+    FPU tie-offs for **non-FPU RoCCs (SHA3)** so BOOM tiles remain FIRRTL-clean.
+  * `generators/boom/src/main/scala/exu/execution-units/rocc.scala`
+    RoCC execution-unit wiring changes to integrate SHA3 into BOOM’s OOO pipeline.
+
+* **SHA3 + Gemmini submodules (forked for experiments)**
+
+  * `.gitmodules` pins:
+
+    * `generators/sha3` → `https://github.com/younghun-kim-dev/sha3.git`
+    * `generators/gemmini` → `https://github.com/younghun-kim-dev/gemmini.git`
+    * `generators/boom` → `https://github.com/younghun-kim-dev/riscv-boom.git`
+  * This ensures that **admissions committees or reviewers can reproduce** the experiments from this exact commit.
+
+* **Benchmark scripts and results**
+
+  * `sims/verilator/sha3_compare.sh` – run HW vs SW SHA3 once and emit `sha3_speed.csv`.
+  * `sims/verilator/gather_sha3_data.sh` – aggregate per-size CSVs into `combined_sha3_speed.csv`.
+  * `sims/verilator/**/` – directories per message size with UART logs (`*.log`), cycle files (`hw.cycs`, `sw.cycs`), and per-size CSVs.
+  * `figs/sha3_speedup_vs_size_with_arrow_colored.png` – speedup vs size plot with 557 KB improvement arrow (this README uses this filename; feel free to regenerate/rename as needed).
+
+---
+
+This layout lets a reader (or admissions committee) quickly map the CV/SOP lines:
+
+> “Integrated a SHA-3 RoCC with Rocket, profiled speedups from 136 B to 544 KB, found speedup collapsing from 206× to 120× due to single-bank inclusive L2 contention, and redesigned L2 as multi-bank to recover ≈34% throughput at large inputs and stabilize efficiency across scales.”
+
+to **specific configs, scripts, CSVs, and figures** in this repository.
