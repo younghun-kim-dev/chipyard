@@ -241,6 +241,4 @@ Pointers from the high-level story above to concrete code in this fork:
   - This README uses compact Markdown tables; full raw CSVs remain in `sims/verilator/...`.  
   - Plots in this README are generated from those CSVs and stored under `figs/`.
 
-This layout lets readers (and admissions committees) quickly map high-level claims in my CV/SOP  
-(e.g., “~58% throughput gain at 1024³ after memory-pipeline co-design”)  
-to **concrete configs, benchmarks, and measurement scripts** in this repository.
+Each result reported above can be reproduced from the configs, benchmarks, and measurement scripts documented in this repository.
