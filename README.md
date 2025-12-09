@@ -264,8 +264,4 @@ Pointers from this high-level story to concrete code and logs in the `chipyard_h
 
 ---
 
-This layout lets a reader (or admissions committee) quickly map the CV/SOP line:
-
-> “Investigated how shared-memory contention shapes accelerator behavior on a BOOM–Rocket–Gemmini SoC, built a co-run profiling framework with cycle-accurate logging, diagnosed ~3× slowdowns from DRAM/L2 contention, and recovered up to 2.7× throughput via 2-channel, 4-bank L2 memory-path tuning that keeps accelerator performance in a tight, predictable band.”
-
-to **specific configs, binaries, logs, and figures** in this branch.
+Each result reported above can be reproduced from the configs, benchmarks, and measurement scripts documented in this repository.
