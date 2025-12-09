@@ -1,9 +1,9 @@
-# Chipyard (Research Fork)
+# Project Summary
 
-This repository is a **research fork** of [Chipyard](https://github.com/ucb-bar/chipyard), used for my accelerator and memory-system experiments.  
-It documents the projects referenced in my CV and Statement of Purpose. It does **not** replace the official Chipyard documentation.
-
-For original tutorials and documentation, please see the upstream repository.
+| 1. RocketConfig WS/OS baseline | 2. BOOM+Gemmini memory-pipeline optimization | 3. Offload threshold K\* (Boom+Gemmini) |
+| --- | --- | --- |
+| <img src="figs/gemminirocket_mac100_vs_M.png" width="260"/> | <img src="figs/boomgemmini_mac100_before_after.png" width="260"/> | **K\*** examples: 4×4 → none, 8×8 → 5, 12×12 → 1 |
+| Even a simple Rocket+Gemmini shows an overhead-dominated → bandwidth-dominated transition; WS consistently beats OS. | Memory-path co-design (SPM/ACC, bus, DMA) raises WS 1024³ throughput by ≈58% and improves OS as well. | Offloading is not always good: K\* depends strongly on tile size/shape and reflects when Gemmini actually beats the CPU. |
 
 ---
 
