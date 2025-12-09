@@ -13,7 +13,7 @@
 ### 1. RocketConfig WS/OS baseline (Rocket + Gemmini)
 
 <p align="center">
-  <img src="figs/gemminirocket_mac100_vs_M.png" width="380"/>
+  <img src="figs/gemminirocket_mac100_vs_M.png" width="500"/>
 </p>
 
 - Characterizes GEMM WS/OS scaling on a simple Rocket+Gemmini SoC.
@@ -24,7 +24,7 @@
 ### 2. BOOM+Gemmini memory-pipeline optimization (V4 → V43)
 
 <p align="center">
-  <img src="figs/boomgemmini_mac100_before_after.png" width="420"/>
+  <img src="figs/boomgemmini_mac100_before_after.png" width="620"/>
 </p>
 
 - Co-designs Gemmini’s **SPM/ACC banking, system bus width, and DMA width**.
@@ -88,11 +88,11 @@ The tables below are small, high-level summaries.
 `chipyard_hetero/sims/verilator/out-sweep-20251015-042642/results.csv` in the `chipyard_hetero` branch.)
 
 <p align="center">
-  <img src="figs/rocket_ws_mac100_K256_heatmap.png" width="260"/>
+  <img src="figs/rocket_ws_mac100_K256_heatmap.png" width="500"/>
 </p>
 
 <p align="center">
-  <img src="figs/rocket_os_mac100_K256_heatmap.png" width="260"/>
+  <img src="figs/rocket_os_mac100_K256_heatmap.png" width="500"/>
 </p>
 
 - Visualizes how **tile shape (M,N)** affects throughput for WS and OS at fixed K=256.
