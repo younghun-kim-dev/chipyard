@@ -1,3 +1,13 @@
+> **Project navigation**
+>
+> | Branch | Project |
+> | --- | --- |
+> | [`chipyard_hetero`](https://github.com/younghun-kim-dev/chipyard/tree/chipyard_hetero) | Heterogeneous SoC Memory Contention: Diagnosis & Mitigation |
+> | `chipyard_gemmini` | **(this branch)** Gemmini Offload Thresholds and Memory-Centric Pipeline Co-Design |
+> | [`chipyard_sha3`](https://github.com/younghun-kim-dev/chipyard/tree/chipyard_sha3) | SHA3 Accelerator Performance Stabilization in Chipyard |
+
+---
+
 # Project Summary
 
 | 1. RocketConfig WS/OS baseline | 2. BOOM+Gemmini memory-pipeline optimization | 3. Offload threshold K\* (Boom+Gemmini) |
